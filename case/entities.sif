@@ -1,0 +1,18 @@
+!------ Skeleton for body section -----
+Body 1
+  Name = copper
+End
+
+!------ Skeleton for boundary section -----
+Boundary Condition 1
+  Name = R1_1_top
+End
+
+Boundary Condition 2
+  Name = J1_1_top
+End
+
+Boundary Condition 3
+  Name = board_outter
+End
+

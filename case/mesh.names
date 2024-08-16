@@ -1,0 +1,6 @@
+! ----- names for bodies -----
+$ copper = 1
+! ----- names for boundaries -----
+$ R1_1_top = 1
+$ J1_1_top = 2
+$ board_outter = 3
