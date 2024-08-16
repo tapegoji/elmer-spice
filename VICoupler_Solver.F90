@@ -329,12 +329,12 @@ SUBROUTINE CouplerSolver( Model,Solver,dt,TransientSimulation)
                 CoordVals(meshDim *j)   = mesh % Nodes % z(i)                
             END IF            
         END DO
-        ! ALLOCATE(writeData(BoundaryNodes*meshDim))
+        ALLOCATE(writeData(BoundaryNodes*meshDim))
         
         CALL Info('CouplerSolver','Created nodes at interface')  
 
         ! !-----------Identify read and write Variables and Create it if it does not exist--------------------
-        ! CALL CreateVariable(readDataName,'readDataName',mesh,BoundaryPerm,Solver,solverParams)
+        CALL CreateVariable(readDataName,'readDataName',mesh,BoundaryPerm,Solver,solverParams)
         CALL CreateVariable(writeDataName,'writeDataName',mesh,BoundaryPerm,Solver,solverParams)
         !-----------------------------------------------------------------------------------------
 
