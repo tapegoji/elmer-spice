@@ -226,6 +226,7 @@ SUBROUTINE CouplerSolver( Model,Solver,dt,TransientSimulation)
     TYPE(Variable_t), POINTER           :: readDataVariable,writeDataVariable
     TYPE(Mesh_t), POINTER               :: mesh
     TYPE(ValueList_t), POINTER          :: simulation, solverParams ! Simulation gets Simulation list, & solverParams hold solver1,solver 2,etc
+    TYPE(Valuelist_t), POINTER :: BC
     !------------------------Data Arrays----------------------------------------------
     REAL(KIND=dp), POINTER              :: CoordVals(:)
     INTEGER, POINTER                    :: BoundaryPerm(:)
@@ -255,6 +256,8 @@ SUBROUTINE CouplerSolver( Model,Solver,dt,TransientSimulation)
     INTEGER                         :: i,j
     !--------------------------Variables-End-------------------------------------------
 
+    REAL (KIND=DP), ALLOCATABLE ::  Load(:)
+
     !--------------------------SAVE-Start-------------------------------------------
     SAVE meshName,readDataName,writeDataName
     SAVE itask
@@ -262,8 +265,8 @@ SUBROUTINE CouplerSolver( Model,Solver,dt,TransientSimulation)
     SAVE readData,writeData
     SAVE BoundaryNodes
     SAVE dmax
+    SAVE Load
     !--------------------------SAVE-End-------------------------------------------
-
 
     !--------------------------Initialize-Start-------------------------------------------
     Simulation => GetSimulation()
@@ -282,7 +285,7 @@ SUBROUTINE CouplerSolver( Model,Solver,dt,TransientSimulation)
         
         !----------------Acquire Names for solver---------------------
         ! BoundaryName = GetString( Simulation, 'maskName', Found )
-        BoundaryName = 'R1_1'
+        BoundaryName = 'r1_1'
         participantName = GetString( Simulation, 'participantName', Found )
         
         !-----------------Convert to preCICE Naming Convention    
@@ -313,6 +316,9 @@ SUBROUTINE CouplerSolver( Model,Solver,dt,TransientSimulation)
         BoundaryNodes = 0
         CALL MakePermUsingMask( Model,Model%Solver,Model%Mesh,BoundaryName,.FALSE., &
             BoundaryPerm,BoundaryNodes)
+
+
+        CALL Info('CouplerSolver','Boundary Name: '//TRIM(BoundaryName))
             
         CALL Info('CouplerSolver','Number of nodes at interface:'//TRIM(I2S(BoundaryNodes)))
         ALLOCATE( CoordVals(meshDim * BoundaryNodes) )
@@ -330,11 +336,31 @@ SUBROUTINE CouplerSolver( Model,Solver,dt,TransientSimulation)
             END IF            
         END DO
         ALLOCATE(writeData(BoundaryNodes*meshDim))
+        ALLOCATE(Load(BoundaryNodes))
         
+
+        ! Print the type of BoundaryPerm
+        DO i=1,Model % NumberOfBCs
+            ! Print *, 'BC: ',  ListGetLogical(Model % BCs(i) % Values, &
+            ! 'Current Density BC',Found)  ! this works
+            
+            IF(.NOT. ListGetLogical(Model % BCs(i) % Values, &
+                'Current Density BC',Found)) CYCLE ! this works too
+            BC => Model % BCs(i) % Values
+            Load = 0.0d0
+            CALL ListAddConstReal(BC, 'Current Density', 1000.1d0)
+            IF (ListGetString(BC, 'Name', Found) /= BoundaryName) CYCLE 
+            ! Print *, 'BC name : ', GetReal(BC,'Current Density', Found) ! this works, gives the value for the whole boundary
+            Print *, 'BC: ',  ListGetReal( Model % BCs(i) % Values,'Current Density', &
+                BoundaryNodes ,vertexIDs,Found ) ! this works. gives the value at each node
+        END DO
+
+
+
         CALL Info('CouplerSolver','Created nodes at interface')  
 
         ! !-----------Identify read and write Variables and Create it if it does not exist--------------------
-        CALL CreateVariable(readDataName,'readDataName',mesh,BoundaryPerm,Solver,solverParams)
+        ! CALL CreateVariable(readDataName,'readDataName',mesh,BoundaryPerm,Solver,solverParams)
         CALL CreateVariable(writeDataName,'writeDataName',mesh,BoundaryPerm,Solver,solverParams)
         !-----------------------------------------------------------------------------------------
 

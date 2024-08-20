@@ -60,11 +60,38 @@ Solver 1
   Calculate Electric Conductivity = True
 End
 
-! CouplerSolver
+! SolverVICouplerBeforeAll
 Solver 2
-  Exec Solver = Always
+  Exec Solver = before all
   Equation = Initialize
-  Procedure = "CouplerSolver.so" "CouplerSolver"
+  Procedure = "VICoupler_Solver.so" "CouplerSolver"
+  writeDataName = String "Potential"
+  readDataName = String "Current Density"
+End
+
+! SolverVICouplerReadData
+Solver 3
+  Exec Solver = before timestep
+  Equation = ReadData
+  Procedure = "VICoupler_Solver.so" "CouplerSolver"
+  writeDataName = String "Potential"
+  readDataName = String "Current Density"
+End
+
+! SolverVICouplerWriteData
+Solver 4
+  Exec Solver = after timestep
+  Equation = WriteData
+  Procedure = "VICoupler_Solver.so" "CouplerSolver"
+  writeDataName = String "Potential"
+  readDataName = String "Current Density"
+End
+
+! SolverVICouplerAfterAll
+Solver 5
+  Exec Solver = after all
+  Equation = Finalize
+  Procedure = "VICoupler_Solver.so" "CouplerSolver"
   writeDataName = String "Potential"
   readDataName = String "Current Density"
 End
@@ -80,6 +107,37 @@ Material 1
   Relative Permeability = 1
   Relative Permittivity = 1
 End
+
+! fr4_generic
+Material 2
+  Name = "FR4 (generic)"
+  Density = 1850.0
+  Electric Conductivity = 0.0
+  Emissivity = 0.85
+  Heat Capacity = 900.0
+  Heat Conductivity = 0.294
+  Relative Permeability = 1.0
+  Relative Permittivity = 4.5
+  Poisson ratio = 0.2
+  Youngs modulus = 22.0e9
+  Heat expansion Coefficient = 14e-6
+End
+
+! resistor_generic
+Material 3
+  Name = "resistor (generic)"
+  Density = 3500.0
+  Electric Conductivity = 0.0
+  Emissivity = 0.85
+  Heat Capacity = 900.0
+  Heat Conductivity = 2
+  Relative Permeability = 1.0
+  Relative Permittivity = 4.5
+  Poisson ratio = 0.2
+  Youngs modulus = 22.0e9
+  Heat expansion Coefficient = 14e-6
+End
+
 
 ! copper
 Body 1
