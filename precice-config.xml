@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<precice-configuration>
+  <log enabled="1">
+    <sink filter="%Severity% > debug" />
+  </log>
+
+  <data:scalar name="Potential" />
+  <data:scalar name="Current Density" />
+
+  <mesh name="Elmer-Nodes-Mesh" dimensions="2">
+    <use-data name="Current Density" />
+    <use-data name="Potential" />
+  </mesh>
+
+  <mesh name="Spice-Nodes-Mesh" dimensions="2">
+    <use-data name="Current Density" />
+    <use-data name="Potential" />
+  </mesh>
+
+  <participant name="Elmer">
+    <provide-mesh name="Elmer-Nodes-Mesh" />
+    <receive-mesh name="Spice-Nodes-Mesh" from="Spice" />
+    <write-data name="Potential" mesh="Elmer-Nodes-Mesh" />
+    <read-data name="Current Density" mesh="Elmer-Nodes-Mesh" />
+    <mapping:nearest-neighbor
+      direction="read"
+      from="Spice-Nodes-Mesh"
+      to="Elmer-Nodes-Mesh"
+      constraint="consistent" />
+    <watch-point mesh="Elmer-Nodes-Mesh" name="Middle" coordinate="5; 0" />
+  </participant>
+
+  <participant name="Spice">
+    <provide-mesh name="Spice-Nodes-Mesh" />
+    <receive-mesh name="Elmer-Nodes-Mesh" from="Elmer" />
+    <write-data name="Current Density" mesh="Spice-Nodes-Mesh" />
+    <read-data name="Potential" mesh="Spice-Nodes-Mesh" />
+    <mapping:nearest-neighbor
+      direction="read"
+      from="Elmer-Nodes-Mesh"
+      to="Spice-Nodes-Mesh"
+      constraint="consistent" />
+  </participant>
+
+  <m2n:sockets acceptor="Elmer" connector="Spice" exchange-directory=".." />
+
+  <coupling-scheme:serial-implicit>
+    <participants first="Elmer" second="Spice" />
+    <max-time value="1.0" />
+    <time-window-size value="0.01" />
+    <max-iterations value="40" />
+    <exchange data="Potential" mesh="Elmer-Nodes-Mesh" from="Elmer" to="Spice" />
+    <exchange
+      data="Current Density"
+      mesh="Spice-Nodes-Mesh"
+      from="Spice"
+      to="Elmer"
+      initialize="true" />
+    <relative-convergence-measure data="Potential" mesh="Elmer-Nodes-Mesh" limit="1e-5" />
+    <relative-convergence-measure data="Current Density" mesh="Spice-Nodes-Mesh" limit="1e-5" />
+    <acceleration:IQN-ILS>
+      <data name="Current Density" mesh="Spice-Nodes-Mesh" />
+      <initial-relaxation value="0.01" />
+      <max-used-iterations value="50" />
+      <time-windows-reused value="8" />
+      <filter type="QR2" limit="1e-3" />
+    </acceleration:IQN-ILS>
+  </coupling-scheme:serial-implicit>
+</precice-configuration>

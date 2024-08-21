@@ -60,11 +60,38 @@ Solver 1
   Calculate Electric Conductivity = True
 End
 
-! CouplerSolver
+! SolverPySpiceCouplerBeforeAll
 Solver 2
-  Exec Solver = Always
+  Exec Solver = before all
   Equation = Initialize
-  Procedure = "CouplerSolver.so" "CouplerSolver"
+  Procedure = "PySpiceCouplerSolver.so" "PySpiceCouplerSolver"
+  writeDataName = String "Potential"
+  readDataName = String "Current Density"
+End
+
+! SolverPySpiceCouplerReadData
+Solver 3
+  Exec Solver = before timestep
+  Equation = ReadData
+  Procedure = "PySpiceCouplerSolver.so" "PySpiceCouplerSolver"
+  writeDataName = String "Potential"
+  readDataName = String "Current Density"
+End
+
+! SolverPySpiceCouplerWriteData
+Solver 4
+  Exec Solver = after timestep
+  Equation = WriteData
+  Procedure = "PySpiceCouplerSolver.so" "PySpiceCouplerSolver"
+  writeDataName = String "Potential"
+  readDataName = String "Current Density"
+End
+
+! SolverPySpiceCouplerAfterAll
+Solver 5
+  Exec Solver = after all
+  Equation = Finalize
+  Procedure = "PySpiceCouplerSolver.so" "PySpiceCouplerSolver"
   writeDataName = String "Potential"
   readDataName = String "Current Density"
 End

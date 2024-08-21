@@ -1,4 +1,4 @@
-ELMER SOLVER (v 9.0) STARTED AT: 2024/08/20 21:46:24
+ELMER SOLVER (v 9.0) STARTED AT: 2024/08/21 11:19:48
 ParCommInit:  Initialize #PEs:            1
 MAIN: 
 MAIN: =============================================================
@@ -24,13 +24,19 @@ LoadInputFile: Loading input file: case.sif
 LoadInputFile: Reading base load of sif file
 CheckKeyword:  Unlisted keyword: [writedataname] in section: [solver 2]
 CheckKeyword:  Unlisted keyword: [readdataname] in section: [solver 2]
+CheckKeyword:  Unlisted keyword: [writedataname] in section: [solver 3]
+CheckKeyword:  Unlisted keyword: [readdataname] in section: [solver 3]
+CheckKeyword:  Unlisted keyword: [writedataname] in section: [solver 4]
+CheckKeyword:  Unlisted keyword: [readdataname] in section: [solver 4]
+CheckKeyword:  Unlisted keyword: [writedataname] in section: [solver 5]
+CheckKeyword:  Unlisted keyword: [readdataname] in section: [solver 5]
 CheckKeyword:  Unlisted keyword: [r1_1] in section: [boundary condition 2]
 LoadInputFile: Number of BCs: 2
 LoadInputFile: Number of Body Forces: 0
 LoadInputFile: Number of Initial Conditions: 0
 LoadInputFile: Number of Materials: 1
 LoadInputFile: Number of Equations: 1
-LoadInputFile: Number of Solvers: 2
+LoadInputFile: Number of Solvers: 5
 LoadInputFile: Number of Bodies: 1
 ListTagKeywords: Setting weight for keywords!
 ListTagKeywords: No parameters width suffix: normalize by area
@@ -38,40 +44,45 @@ ListTagKeywords: Setting weight for keywords!
 ListTagKeywords: No parameters width suffix: normalize by volume
 ElmerAsciiMesh: Base mesh name: ./case
 MapCoordinates: Scaling coordinates: 1.000E-03 1.000E-03 1.000E-03
-LoadMesh: Elapsed REAL time:     0.0389 (s)
+LoadMesh: Elapsed REAL time:     0.0406 (s)
 MAIN: -------------------------------------
 AddVtuOutputSolverHack: Adding ResultOutputSolver to write VTU output in file: case
 OptimizeBandwidth: Initial bandwidth for static current conduction: 6756
 OptimizeBandwidth: Optimized bandwidth for static current conduction: 269
 MAIN: Number of timesteps to be saved: 1000
+PySpiceCouplerSolver: Initializing Coupler Solver
+ R1_1   
+PySpiceCouplerSolver: Number of nodes at interface:417
+PySpiceCouplerSolver: Created nodes at interface
+PySpiceCouplerSolver: Using existing variable : potential
+PySpiceCouplerSolver: Ended
 MAIN: 
 MAIN: -------------------------------------
 MAIN:  Steady state iteration:            1
 MAIN: -------------------------------------
 MAIN: 
+PySpiceCouplerSolver: Updating Current Density for Boundary: r1_1
+ Current density is set to :   -55555555.100000001       -55555555.100000001       -55555555.100000001     
+PySpiceCouplerSolver: Ended
 StatCurrentSolve: -------------------------------------
 StatCurrentSolve: STAT CURRENT SOLVER:
 StatCurrentSolve: -------------------------------------
 StatCurrentSolve: Static current iteration: 1
-StatCurrentSolve:  Assembly (s)          :   9.9879000000000023E-002
-       2 0.6916E-11
-ComputeChange: NS (ITER=1) (NRM,RELC): (  649.99965      2.0000000     ) :: static current conduction
-StatCurrentSolve:  Solve (s)             :   4.2799000000000031E-002
-StatCurrentSolve:  Total Heating Power   :   2.6399346061251150E-005
+StatCurrentSolve:  Assembly (s)          :   8.9068000000000008E-002
+       2 0.6901E-11
+ComputeChange: NS (ITER=1) (NRM,RELC): (  646.59391      2.0000000     ) :: static current conduction
+StatCurrentSolve:  Solve (s)             :   3.9306999999999981E-002
+StatCurrentSolve:  Total Heating Power   :   2524.8420580566849
 StatCurrentSolve: Static current iteration: 2
-StatCurrentSolve:  Assembly (s)          :   5.7785000000000031E-002
-       1 0.4773E-15
-ComputeChange: NS (ITER=2) (NRM,RELC): (  649.99966     0.11874369E-07 ) :: static current conduction
-StatCurrentSolve:  Solve (s)             :   4.0214000000000028E-002
-StatCurrentSolve:  Total Heating Power   :   2.5244672781593658E-005
-ComputeChange: SS (ITER=1) (NRM,RELC): (  649.99966      2.0000000     ) :: static current conduction
-CouplerSolver: Initializing Coupler Solver
- r1_1   
-CouplerSolver: Boundary Name: r1_1
-CouplerSolver: Number of nodes at interface:417
-CouplerSolver: Created nodes at interface
-CouplerSolver: Using existing variable : potential
-CouplerSolver: Ended
+StatCurrentSolve:  Assembly (s)          :   5.8948999999999974E-002
+       1 0.4736E-15
+ComputeChange: NS (ITER=2) (NRM,RELC): (  646.59392     0.11992796E-07 ) :: static current conduction
+StatCurrentSolve:  Solve (s)             :   3.8840999999999959E-002
+StatCurrentSolve:  Total Heating Power   :   2524.8304784230563
+ComputeChange: SS (ITER=1) (NRM,RELC): (  646.59392      2.0000000     ) :: static current conduction
+PySpiceCouplerSolver: Writing data to circuit simulator
+ Maximum potential at R1_1 =    634.64527815490283     
+PySpiceCouplerSolver: Ended
 ResultOutputSolver: -------------------------------------
 ResultOutputSolver: Saving with prefix: case
 ResultOutputSolver: Creating list for saving - if not present
@@ -85,54 +96,29 @@ MAIN: -------------------------------------
 MAIN:  Steady state iteration:            2
 MAIN: -------------------------------------
 MAIN: 
+PySpiceCouplerSolver: Updating Current Density for Boundary: r1_1
+ Current density is set to :   -55555555.100000001       -55555555.100000001       -55555555.100000001     
+PySpiceCouplerSolver: Ended
 StatCurrentSolve: -------------------------------------
 StatCurrentSolve: STAT CURRENT SOLVER:
 StatCurrentSolve: -------------------------------------
 StatCurrentSolve: Static current iteration: 1
-StatCurrentSolve:  Assembly (s)          :   5.9055999999999997E-002
-       1 0.5252E-10
-ComputeChange: NS (ITER=1) (NRM,RELC): (  646.59690     0.52487446E-02 ) :: static current conduction
-StatCurrentSolve:  Solve (s)             :   3.8712999999999997E-002
-StatCurrentSolve:  Total Heating Power   :   2520.3756649499796
-StatCurrentSolve: Static current iteration: 2
-StatCurrentSolve:  Assembly (s)          :   6.0501999999999945E-002
-       1 0.4730E-13
-ComputeChange: NS (ITER=2) (NRM,RELC): (  646.59392     0.46100862E-05 ) :: static current conduction
-StatCurrentSolve:  Solve (s)             :   3.8784000000000041E-002
-StatCurrentSolve:  Total Heating Power   :   2524.8264631815805
-StatCurrentSolve: Static current iteration: 3
-StatCurrentSolve:  Assembly (s)          :   5.8060999999999918E-002
-       1 0.3862E-15
-ComputeChange: NS (ITER=3) (NRM,RELC): (  646.59392     0.41521944E-08 ) :: static current conduction
-StatCurrentSolve:  Solve (s)             :   3.9129999999999998E-002
-StatCurrentSolve:  Total Heating Power   :   2524.8304737554718
-ComputeChange: SS (ITER=2) (NRM,RELC): (  646.59392     0.52533589E-02 ) :: static current conduction
-CouplerSolver: Ended
+StatCurrentSolve:  Assembly (s)          :   5.9063999999999894E-002
+       1 0.3831E-15
+ComputeChange: NS (ITER=1) (NRM,RELC): (  646.59392     0.10092307E-12 ) :: static current conduction
+StatCurrentSolve:  Solve (s)             :   3.8548000000000027E-002
+StatCurrentSolve:  Total Heating Power   :   2524.8304784027432
+ComputeChange: SS (ITER=2) (NRM,RELC): (  646.59392     0.10092307E-12 ) :: static current conduction
+PySpiceCouplerSolver: Writing data to circuit simulator
+ Maximum potential at R1_1 =    634.64527815493818     
+PySpiceCouplerSolver: Ended
 ResultOutputSolver: -------------------------------------
 ResultOutputSolver: Saving in unstructured VTK XML (.vtu) format
 ResultOutputSolver: -------------------------------------
-MAIN: 
-MAIN: -------------------------------------
-MAIN:  Steady state iteration:            3
-MAIN: -------------------------------------
-MAIN: 
-StatCurrentSolve: -------------------------------------
-StatCurrentSolve: STAT CURRENT SOLVER:
-StatCurrentSolve: -------------------------------------
-StatCurrentSolve: Static current iteration: 1
-StatCurrentSolve:  Assembly (s)          :   5.9356999999999993E-002
-       1 0.3678E-15
-ComputeChange: NS (ITER=1) (NRM,RELC): (  646.59392     0.48001756E-11 ) :: static current conduction
-StatCurrentSolve:  Solve (s)             :   3.8382999999999834E-002
-StatCurrentSolve:  Total Heating Power   :   2524.8304783534245
-ComputeChange: SS (ITER=3) (NRM,RELC): (  646.59392     0.48001756E-11 ) :: static current conduction
-CouplerSolver: Writing data to circuit simulator
- Maximum potential at R1_1 =    634.64527815509359     
-CouplerSolver: Ended
-ResultOutputSolver: -------------------------------------
-ResultOutputSolver: Saving in unstructured VTK XML (.vtu) format
-ResultOutputSolver: -------------------------------------
+PySpiceCouplerSolver: Updating Current Density for Boundary: r1_1
+ Current density is set to :   -55555555.100000001       -55555555.100000001       -55555555.100000001     
+PySpiceCouplerSolver: Ended
 MAIN: *** Elmer Solver: ALL DONE ***
 MAIN: The end
-SOLVER TOTAL TIME(CPU,REAL):         1.14        1.41
-ELMER SOLVER FINISHED AT: 2024/08/20 21:46:25
+SOLVER TOTAL TIME(CPU,REAL):         0.71        0.98
+ELMER SOLVER FINISHED AT: 2024/08/21 11:19:49
