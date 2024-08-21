@@ -100,7 +100,7 @@ End
 Boundary Condition 2
   Target Boundaries(1) = 1
   Name = "R1_1"
-  Current Density =  -55.23007547526982
+  Current Density =  -5555.23007547526982
   Current Density BC = Logical True
   R1_1 = Logical True
 End

@@ -348,11 +348,11 @@ SUBROUTINE CouplerSolver( Model,Solver,dt,TransientSimulation)
                 'Current Density BC',Found)) CYCLE ! this works too
             BC => Model % BCs(i) % Values
             Load = 0.0d0
-            CALL ListAddConstReal(BC, 'Current Density', 1000.1d0)
-            IF (ListGetString(BC, 'Name', Found) /= BoundaryName) CYCLE 
+            IF (ListGetString(BC, 'Name', Found) /= BoundaryName) CYCLE
+            CALL ListAddConstReal(BC, 'Current Density', -55555555.1d0) 
             ! Print *, 'BC name : ', GetReal(BC,'Current Density', Found) ! this works, gives the value for the whole boundary
-            Print *, 'BC: ',  ListGetReal( Model % BCs(i) % Values,'Current Density', &
-                BoundaryNodes ,vertexIDs,Found ) ! this works. gives the value at each node
+            ! Print *, 'BC: ',  ListGetReal( Model % BCs(i) % Values,'Current Density', &
+            !     BoundaryNodes ,vertexIDs,Found ) ! this works. gives the value at each node
         END DO
 
 
