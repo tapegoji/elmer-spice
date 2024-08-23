@@ -227,7 +227,7 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
     TYPE(Mesh_t), POINTER               :: mesh
     TYPE(ValueList_t), POINTER          :: simulation, solverParams, BC ! Simulation gets Simulation list, & solverParams hold solver1,solver 2,etc
     !------------------------Data Arrays----------------------------------------------
-    REAL(KIND=dp), POINTER              :: CoordVals(:)
+    REAL(KIND=dp), POINTER              :: CoordVals(:), nodeCoordVals(:)
     INTEGER, POINTER                    :: BoundaryPerm(:)
     !------------------------Time Variable----------------------------------------------
     TYPE(Variable_t), POINTER :: TimeVar
@@ -243,10 +243,10 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
     INTEGER                         :: meshID,readDataID, writeDataID, meshDim
     !------------------------Data Arrays----------------------------------------------
     REAL(KIND=dp), POINTER :: vertices(:), writeData(:), readData(:)
-    INTEGER, POINTER                :: vertexIDs(:)
+    INTEGER, POINTER                :: vertexIDs(:), nodeIDs(:)
     REAL(KIND=dp) :: dmax
     !------------------------Mesh Data----------------------------------------------
-    INTEGER                         :: BoundaryNodes
+    INTEGER                         :: BoundaryNodes, numberOfNodes
     INTEGER                         :: Dofs
     INTEGER                         :: dimensions ! ?? Do not know 
     !----------------------Time Loop Control Variables-----------------------------
@@ -258,9 +258,9 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
     !--------------------------SAVE-Start-------------------------------------------
     SAVE meshName,readDataName,writeDataName
     SAVE itask
-    SAVE BoundaryPerm,CoordVals,vertexIDs
+    SAVE BoundaryPerm,CoordVals,vertexIDs, nodeIDs, nodeCoordVals
     SAVE readData,writeData
-    SAVE BoundaryNodes
+    SAVE BoundaryNodes, numberOfNodes
     SAVE dmax
     !--------------------------SAVE-End-------------------------------------------
 
@@ -286,25 +286,20 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
         participantName = GetString( Simulation, 'participantName', Found )
         
         !-----------------Convert to preCICE Naming Convention    
-        IF (participantName == 'solid') THEN
-            participantName = 'Solid'
+        IF (participantName == 'elmer') THEN
+            participantName = 'Elmer'
         END IF
-        IF (participantName == 'fluid') THEN
-            participantName = 'Fluid'
-        END IF
+
         meshName = GetString( Simulation, 'meshName', Found )
-        IF (meshName == 'solid-mesh') THEN
-            meshName = 'Solid-Mesh'
-        END IF
-        IF (meshName == 'fluid-mesh') THEN
-            meshName = 'Fluid-Mesh'
+        IF (meshName == 'elmer-nodes-mesh') THEN
+            meshName = 'Elmer-Nodes-Mesh'
         END IF
         !---------------------------------------------------------------------
 
         !-----------------Get Config Path-------------------------------------
         config = GetString( Simulation, 'configPath', Found )
 
-        Print *, TRIM(BoundaryName)," ",TRIM(participantName)," ",TRIM(meshName)," ",TRIM(config)
+        Print *, TRIM(participantName)," ",TRIM(meshName)," ",TRIM(config)
         
         !-----------Identify Vertex on Coupling Interface & Save Coordinates--------------------
         NULLIFY( BoundaryPerm )    
@@ -331,6 +326,7 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
         END DO
         ! ALLOCATE(writeData(BoundaryNodes*meshDim))
         
+ 
         CALL Info('PySpiceCouplerSolver','Created nodes at interface')  
 
         ! !-----------Identify read and write Variables and Create it if it does not exist--------------------
@@ -338,11 +334,68 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
         CALL CreateVariable(writeDataName,'writeDataName',mesh,BoundaryPerm,Solver,solverParams)
         !-----------------------------------------------------------------------------------------
 
+        ! !---------------Initializing preCICE------------------------------------------ 
+        CALL Info('CouplerSolver','Initializing preCICE')     
+        CALL precicef_create(participantName, config, rank, commsize)
+        
+        CALL Info('CouplerSolver','Setting up mesh in preCICE')
+        CALL precicef_get_mesh_dimensions(meshName, dimensions)
+        
+        
+        ! TODO: This is a placeholder for now. This will be replaced by the actual number of nodes
+        numberOfNodes = 1
+        
+        
+        ALLOCATE( nodeCoordVals( numberOfNodes * dimensions ) )
+        ALLOCATE( nodeIDs( numberOfNodes ) )
+        Do i = 1, numberOfNodes
+            nodeCoordVals(dimensions * i - 1) = i
+            nodeCoordVals(dimensions * i) = 0.0
+        END DO
+        print *, 'number of nodes: ', numberOfNodes
+        print *, 'coordinates: ', nodeCoordVals
+        CALL precicef_set_vertices(meshName, numberOfNodes, nodeCoordVals, nodeIDs)
+        print *, 'nodeIDs: ', nodeIDs
+
+        ALLOCATE(readData(numberOfNodes))
+        ALLOCATE(writeData(numberOfNodes *dimensions))
+
+        readData = 0
+        writeData = 0
+        
+        CALL precicef_requires_initial_data(bool)
+        IF (bool.EQ.1) THEN
+            CALL Info('CouplerSolver', 'preCICE requires initial data')
+            IF (writeDataName == 'potential') THEN
+                CALL precicef_write_data(meshName, 'Potential', numberOfNodes, nodeIDs, writeData)
+            END IF
+        END IF
+        CALL precicef_initialize()
+        CALL precicef_is_coupling_ongoing(ongoing)
+        
         itask = 2
     case(2)
         ! Place holder for readdata. i.e setting the current density in elmer
         !-----------------------------------------------------------------------------------------
         ! Go through all the BCs and update the current density
+
+        !-------------------Copy Read values from Variable to buffer---------------------
+        CALL precicef_requires_reading_checkpoint(bool)
+
+        IF (bool.EQ.1) THEN
+            WRITE (*,*) 'Reading iteration checkpoint required'
+        ELSE
+            WRITE (*,*) 'No reading iteration checkpoint required'
+        ENDIF
+        
+        CALL Info('CouplerSolver ', 'Readinging the data from preCICE')    
+        CALL precicef_get_max_time_step_size(dt)
+        ! print nodeIDs
+        CALL precicef_read_data(meshName, 'Current Density', numberOfNodes, nodeIDs, dt, readData)
+
+        print *, 'Current density that was read from preCICE is: ', readData(1) ! this works, gives the value for the whole boundary
+
+        ! readData contains the current density that was sent by the precice. This will be written to the boundary condition in Elmer
         DO i=1,Model % NumberOfBCs
             BC => Model % BCs(i) % Values
             ! chck if the BC is current density BC
@@ -356,7 +409,7 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
                     ! check if the BC is the one we are looking for                
                     IF (ListGetString(BC, 'Name', Found) /= BoundaryName) CYCLE
                     CALL Info('PySpiceCouplerSolver ','Updating Current Density for Boundary: '//TRIM(BoundaryName), LEVEL=4)                
-                    CALL ListAddConstReal(BC, 'Current Density', -55555555.1d0) 
+                    CALL ListAddConstReal(BC, 'Current Density', REAL(readData(1), dp))
                     Print *, 'Current density is set to : ', GetReal(BC,'Current Density', Found) ! this works, gives the value for the whole boundary
                 END DO
             END DO
@@ -376,11 +429,22 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
             CALL MakePermUsingMask( Model,Model%Solver,Model%Mesh,BoundaryName,.FALSE., &
                 BoundaryPerm,BoundaryNodes)
             CALL GetMaxData(writeDataName,mesh,BoundaryPerm,dmax)
+            writeData = dmax
+            CALL precicef_write_data(meshName, 'Potential', numberOfNodes, nodeIDs, writeData)
             ! TODO: Write it using call info
-            print *, 'Maximum ', TRIM(writeDataName), ' at ', TRIM(BoundaryName), ' = ', dmax
+            print *, 'Maximum ', TRIM(writeDataName), ' at ', TRIM(BoundaryName), ' = ', writeData   
             ! CALL Info('PySpiceCouplerSolver: potent', TRIM(writeDataName) , LEVEL=4)
         END DO
-        itask = 2
+        !-------------------Advance preCICE-------------------------------------------------------
+        CALL precicef_advance(dt)
+        CALL precicef_is_coupling_ongoing(ongoing)
+
+        
+        IF(ongoing.EQ.0) THEN
+            itask = 4
+        ELSE
+            itask = 2
+        END IF
     end select
 
     CALL Info('PySpiceCouplerSolver','Ended')

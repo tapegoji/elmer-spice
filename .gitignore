@@ -1,0 +1,6 @@
+precice-profiling/
+*.log
+*.pyc
+*.so
+results/
+*.vtu

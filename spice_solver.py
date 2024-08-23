@@ -1,5 +1,6 @@
 import numpy as np
 import precice
+import math
 
 print("Starting Spice Solver...")
 
@@ -20,15 +21,21 @@ grid[:, 0] = np.linspace(0, N-1, N )  # x component
 grid[:, 1] = 0  # np.linspace(0, config.L, N+1)  # y component, leave blank
 
 Vin = 650
-R1 = 1e3
-trace_resistance = 1e-3
-pad_currents = [Vin/(R1+trace_resistance)]
-pad_areas = [1e-4]
+R1 = 0.1
+
+trace_resistance = 1e-3 # initial guess
+
+pad_currents = [-Vin / (R1 + trace_resistance)]
+pad_areas = [2.927599612256225e-6]  # for now, we have only one pad
 pad_current_density = np.array(pad_currents)/np.array(pad_areas)
+
 writeData = pad_current_density * np.ones(N)
+
 vertexIDs = interface.set_mesh_vertices(meshName, grid)
+print('------------------vertexIDs:', vertexIDs)
 
 if interface.requires_initial_data():
+    print("preCICE: requires initial data ...")
     interface.write_data(meshName, writeDataName,
                          vertexIDs, writeData)
     
@@ -46,17 +53,26 @@ while interface.is_coupling_ongoing():
     precice_dt = interface.get_max_time_step_size()
 
 
-    # Read data, solve timestep, and write data
+    print('---------------------------------------------reading potentials from preCICE----------------------------')
     pad_potentials = interface.read_data(
         meshName, readDataName, vertexIDs, precice_dt)
-    print('-------------read potentials')
+
     print(pad_potentials)
     
     # calculate the trace resistance
-    trace_resistance = (650 - pad_potentials[0]) / pad_currents[0]
-    pad_currents = [Vin/(R1 + trace_resistance)]
+    print('---------------------------------------------trace resistance calculation------------------------------------')
+    print('pad_currents:', pad_currents)
+    trace_resistance = (Vin - pad_potentials[0]) / math.fabs(pad_currents[0])
+    print(trace_resistance)
+    
+    # dummy spice simulation
+    # set the current out of the pad to be negative
+    pad_currents = [-Vin/(R1 + trace_resistance)]
     pad_current_density = np.array(pad_currents)/np.array(pad_areas)
+
+    print('---------------------------------------------writing currents densities to preCICE----------------------------')
     writeData = pad_current_density * np.ones(N)
+    print(writeData)
     interface.write_data(meshName, writeDataName,
                          vertexIDs, writeData)
 

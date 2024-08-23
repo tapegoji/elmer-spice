@@ -20,7 +20,7 @@ grid[:, 0] = np.linspace(0, N-1, N )  # x component
 grid[:, 1] = 0  # np.linspace(0, config.L, N+1)  # y component, leave blank
 
 pad_potentials = [650]
-pad_areas = [1e-4]
+pad_areas = [2.927599612256225e-6]
 
 writeData = pad_potentials * np.ones(N)
 vertexIDs = interface.set_mesh_vertices(meshName, grid)
@@ -42,9 +42,10 @@ while interface.is_coupling_ongoing():
     precice_dt = interface.get_max_time_step_size()
 
     # Read data, solve timestep, and write data
+    print('vertexIDs:', vertexIDs)
     pad_current_densities = interface.read_data(
         meshName, readDataName, vertexIDs, precice_dt)
-    print('-------------read current densities')
+    print('---------------------------------------------reading currents---------------------------------------------')
     print('printing currents')
     print(pad_current_densities*pad_areas)
     # print(pad_current_densities)
@@ -53,7 +54,8 @@ while interface.is_coupling_ongoing():
     # calculate the trace resistance
     trace_resistance = 1e3
     writeData = [650 - pad_currents[0] * trace_resistance]
-
+    print('---------------------------------------------writing potentials---------------------------------------------')
+    print(writeData)
     interface.write_data(meshName, writeDataName,
                          vertexIDs, writeData)
     

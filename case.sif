@@ -8,12 +8,24 @@ Simulation
   Max Output Level = 5
   Coordinate System = Cartesian
   Coordinate Mapping(3) = 1 2 3
-  Simulation Type = Steady state
-  Steady State Max Iterations = 1000
+  ! Simulation Type = Steady state
+  ! Steady State Max Iterations = 1000
+  Simulation Type = Transient
+  Steady State Max Iterations = 3
+  Output Intervals = 1
+  Timestepping Method = BDF
+  BDF Order = 2
+  Timestep intervals = 10
+  Timestep Sizes = 0.1
+  
   Output Intervals(1) = 1
   Coordinate Scaling = 0.001
   Solver Input File = case.sif
   Post File = case.vtu
+  participantName = String "Elmer"
+  meshName = String "Elmer-Nodes-Mesh"
+  configPath = String "precice-config.xml"
+
 End
 
 Constants
