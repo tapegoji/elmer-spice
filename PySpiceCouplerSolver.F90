@@ -366,9 +366,7 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
         CALL precicef_requires_initial_data(bool)
         IF (bool.EQ.1) THEN
             CALL Info('CouplerSolver', 'preCICE requires initial data')
-            IF (writeDataName == 'potential') THEN
-                CALL precicef_write_data(meshName, 'Potential', numberOfNodes, nodeIDs, writeData)
-            END IF
+            CALL precicef_write_data(meshName, 'Potential', numberOfNodes, nodeIDs, writeData)
         END IF
         CALL precicef_initialize()
         CALL precicef_is_coupling_ongoing(ongoing)
@@ -382,17 +380,11 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
         !-------------------Copy Read values from Variable to buffer---------------------
         CALL precicef_requires_reading_checkpoint(bool)
 
-        IF (bool.EQ.1) THEN
-            WRITE (*,*) 'Reading iteration checkpoint required'
-        ELSE
-            WRITE (*,*) 'No reading iteration checkpoint required'
-        ENDIF
-        
-        CALL Info('CouplerSolver ', 'Readinging the data from preCICE')    
+        CALL Info('CouplerSolver ', 'Readinging the data from preCICE', LEVEL=5)                
         CALL precicef_get_max_time_step_size(dt)
-        ! print nodeIDs
         CALL precicef_read_data(meshName, 'Current Density', numberOfNodes, nodeIDs, dt, readData)
-
+        
+        ! Convert to CALL Info with LEVEL= 5
         print *, 'Current density that was read from preCICE is: ', readData(1) ! this works, gives the value for the whole boundary
 
         ! readData contains the current density that was sent by the precice. This will be written to the boundary condition in Elmer
@@ -410,7 +402,6 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
                     IF (ListGetString(BC, 'Name', Found) /= BoundaryName) CYCLE
                     CALL Info('PySpiceCouplerSolver ','Updating Current Density for Boundary: '//TRIM(BoundaryName), LEVEL=4)                
                     CALL ListAddConstReal(BC, 'Current Density', REAL(readData(1), dp))
-                    Print *, 'Current density is set to : ', GetReal(BC,'Current Density', Found) ! this works, gives the value for the whole boundary
                 END DO
             END DO
         END DO

@@ -77,8 +77,8 @@ Solver 2
   Exec Solver = before all
   Equation = Initialize
   Procedure = "PySpiceCouplerSolver.so" "PySpiceCouplerSolver"
-  writeDataName = String "Potential"
-  readDataName = String "Current Density"
+  writeDataName = File "Potential"
+  readDataName = File "Current Density"
 End
 
 ! SolverPySpiceCouplerReadData
@@ -86,8 +86,8 @@ Solver 3
   Exec Solver = before timestep
   Equation = ReadData
   Procedure = "PySpiceCouplerSolver.so" "PySpiceCouplerSolver"
-  writeDataName = String "Potential"
-  readDataName = String "Current Density"
+  writeDataName = File "Potential"
+  readDataName = File "Current Density"
 End
 
 ! SolverPySpiceCouplerWriteData
@@ -95,8 +95,8 @@ Solver 4
   Exec Solver = after timestep
   Equation = WriteData
   Procedure = "PySpiceCouplerSolver.so" "PySpiceCouplerSolver"
-  writeDataName = String "Potential"
-  readDataName = String "Current Density"
+  writeDataName = File "Potential"
+  readDataName = File "Current Density"
 End
 
 ! SolverPySpiceCouplerAfterAll
@@ -104,8 +104,8 @@ Solver 5
   Exec Solver = after all
   Equation = Finalize
   Procedure = "PySpiceCouplerSolver.so" "PySpiceCouplerSolver"
-  writeDataName = String "Potential"
-  readDataName = String "Current Density"
+  writeDataName = File "Potential"
+  readDataName = File "Current Density"
 End
 
 

@@ -1,1 +1,0 @@
-/home/asepahvand/repo/elmer-spice/.venv/bin/python
