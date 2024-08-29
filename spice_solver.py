@@ -11,6 +11,7 @@ print("preCICE configured...")
 meshName = "Spice-Nodes-Mesh"
 readDataName = "Potential"
 writeDataName = "Current Density"
+writeDataName2 = "NewPotential"
 
 dimensions = interface.get_mesh_dimensions(meshName)
 
@@ -21,7 +22,7 @@ grid[:, 0] = np.linspace(0, N-1, N )  # x component
 grid[:, 1] = 0  # np.linspace(0, config.L, N+1)  # y component, leave blank
 
 Vin = 650
-R1 = 0.1
+R1 = 1e3
 
 trace_resistance = 1e-3 # initial guess
 
@@ -30,14 +31,15 @@ pad_areas = [2.927599612256225e-6]  # for now, we have only one pad
 pad_current_density = np.array(pad_currents)/np.array(pad_areas)
 
 writeData = pad_current_density * np.ones(N)
+writeData2 = Vin * np.ones(N)
 
 vertexIDs = interface.set_mesh_vertices(meshName, grid)
 print('------------------vertexIDs:', vertexIDs)
 
 if interface.requires_initial_data():
     print("preCICE: requires initial data ...")
-    interface.write_data(meshName, writeDataName,
-                         vertexIDs, writeData)
+    interface.write_data(meshName, writeDataName,  vertexIDs, writeData)
+    interface.write_data(meshName, writeDataName2, vertexIDs, writeData2)
     
 print("Spice: init precice...")
 
@@ -62,7 +64,10 @@ while interface.is_coupling_ongoing():
     # calculate the trace resistance
     print('---------------------------------------------trace resistance calculation------------------------------------')
     print('pad_currents:', pad_currents)
-    trace_resistance = (Vin - pad_potentials[0]) / math.fabs(pad_currents[0])
+    if pad_currents[0] == 0:
+        trace_resistance = 1e-3
+    else:
+        trace_resistance = (Vin - pad_potentials[0]) / math.fabs(pad_currents[0])
     print(trace_resistance)
     
     # dummy spice simulation
@@ -73,8 +78,8 @@ while interface.is_coupling_ongoing():
     print('---------------------------------------------writing currents densities to preCICE----------------------------')
     writeData = pad_current_density * np.ones(N)
     print(writeData)
-    interface.write_data(meshName, writeDataName,
-                         vertexIDs, writeData)
+    interface.write_data(meshName, writeDataName,  vertexIDs, writeData)
+    interface.write_data(meshName, writeDataName2, vertexIDs, writeData2)
 
     # Advance the coupling
     interface.advance(precice_dt)

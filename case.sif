@@ -22,9 +22,9 @@ Simulation
   Coordinate Scaling = 0.001
   Solver Input File = case.sif
   Post File = case.vtu
-  participantName = String "Elmer"
-  meshName = String "Elmer-Nodes-Mesh"
-  configPath = String "precice-config.xml"
+  participantName = File "Elmer"
+  meshName = File "Elmer-Nodes-Mesh"
+  configPath = File "precice-config.xml"
 
 End
 
@@ -79,6 +79,7 @@ Solver 2
   Procedure = "PySpiceCouplerSolver.so" "PySpiceCouplerSolver"
   writeDataName = File "Potential"
   readDataName = File "Current Density"
+  readDataName2 = File "NewPotential"
 End
 
 ! SolverPySpiceCouplerReadData
@@ -88,6 +89,7 @@ Solver 3
   Procedure = "PySpiceCouplerSolver.so" "PySpiceCouplerSolver"
   writeDataName = File "Potential"
   readDataName = File "Current Density"
+  readDataName2 = File "NewPotential"
 End
 
 ! SolverPySpiceCouplerWriteData
@@ -97,6 +99,7 @@ Solver 4
   Procedure = "PySpiceCouplerSolver.so" "PySpiceCouplerSolver"
   writeDataName = File "Potential"
   readDataName = File "Current Density"
+  readDataName2 = File "NewPotential"
 End
 
 ! SolverPySpiceCouplerAfterAll
@@ -106,6 +109,7 @@ Solver 5
   Procedure = "PySpiceCouplerSolver.so" "PySpiceCouplerSolver"
   writeDataName = File "Potential"
   readDataName = File "Current Density"
+  readDataName2 = File "NewPotential"
 End
 
 
@@ -125,6 +129,7 @@ Body 1
   Target Bodies(1) = 1
   Equation = 1  ! StaticCurrentConduction
   Material = 1  ! copper
+  Initial Condition = 1
 End
 
 
@@ -132,18 +137,22 @@ End
 Boundary Condition 1
   Target Boundaries(1) = 2
   Name = "J1_1"
-  Potential = 650.0
+  Potential = Equals "Potential"
+  J1_1 = Logical True
 End
 
 ! R1_1
 Boundary Condition 2
   Target Boundaries(1) = 1
   Name = "R1_1"
-  Current Density =  -5555.23007547526982
+  Current Density =  0
   Current Density BC = Logical True
   R1_1 = Logical True
 End
 
+Initial Condition 1
+  Potential = 0
+End
 
 
 
