@@ -4,3 +4,4 @@ precice-profiling/
 *.so
 results/
 *.vtu
+case/
