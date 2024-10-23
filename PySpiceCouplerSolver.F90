@@ -298,8 +298,12 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
     solverParams => GetSolverParams()
     meshDim = Mesh % MaxDim
     
-    rank = 0
-    commsize = 1
+        ! INTEGER :: CustomComm, CommRank, ierr
+    CALL Info('CouplerSolver:','my rank is:'// I2S(ParEnv % MyPe), LEVEL=5)
+    CALL Info('CouplerSolver','commsize:'// I2S(ParEnv % PEs), LEVEL=5)
+    rank = ParEnv % MyPe
+    commSize = ParEnv % PEs
+
     select case(itask)
     case(1)
         CALL Info('PySpiceCouplerSolver ', 'Initializing Coupler Solver')
@@ -371,11 +375,6 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
 
         ! !---------------Initializing preCICE------------------------------------------ 
         CALL Info('CouplerSolver','Initializing preCICE')
-        ! INTEGER :: CustomComm, CommRank, ierr
-        CALL Info('CouplerSolver:','my rank is:'// I2S(ParEnv % MyPe), LEVEL=5)
-        CALL Info('CouplerSolver','commsize:'// I2S(ParEnv % PEs), LEVEL=5)
-        rank = ParEnv % MyPe
-        commSize = ParEnv % PEs
         CALL precicef_create(participantName, config, rank, commsize)
         
         CALL Info('CouplerSolver','Setting up mesh in preCICE')
