@@ -388,8 +388,8 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
         ALLOCATE( nodeCoordVals( numberOfNodes * dimensions ) )
         ALLOCATE( nodeIDs( numberOfNodes ) )
         Do i = 1, numberOfNodes
-            nodeCoordVals(dimensions * i - 1) = i
-            nodeCoordVals(dimensions * i) = 0.0
+            nodeCoordVals(dimensions * i - 1) = i-1
+            nodeCoordVals(dimensions * i) = rank
         END DO
         print *, 'number of nodes: ', numberOfNodes
         print *, 'coordinates: ', nodeCoordVals
@@ -465,8 +465,12 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
             BoundaryNodes = 0
             CALL MakePermUsingMask( Model,Model%Solver,Model%Mesh,BoundaryName,.FALSE., &
                 BoundaryPerm,BoundaryNodes)
-            
-                CALL GetMaxData(writeDataName,mesh,BoundaryPerm,dmax)
+            print *, 'BoundaryNodes: ', BoundaryNodes
+            ! print my rank
+            print *, 'my rank is: ', rank
+            ! if this rank is not the one that is supposed to write, then skip
+            if (BoundaryNodes == 0) CYCLE
+            CALL GetMaxData(writeDataName,mesh,BoundaryPerm,dmax)
             writeData = dmax
             
             CALL precicef_write_data(meshName, writeDataName, numberOfNodes, nodeIDs, writeData)
@@ -484,6 +488,15 @@ SUBROUTINE PySpiceCouplerSolver( Model,Solver,dt,TransientSimulation)
         ELSE
             itask = 2
         END IF
+    case (4)
+        CALL Info('PySpiceCouplerSolver','Ending Coupler Solver')
+        CALL precicef_finalize()
+        DEALLOCATE(nodeCoordVals)
+        DEALLOCATE(nodeIDs)
+        DEALLOCATE(readData)
+        DEALLOCATE(readData2)
+        DEALLOCATE(writeData)
+        DEALLOCATE(BoundaryPerm)
     end select
 
     CALL Info('PySpiceCouplerSolver','Ended')
