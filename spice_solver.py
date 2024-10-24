@@ -63,7 +63,8 @@ while interface.is_coupling_ongoing():
         meshName, readDataName, vertexIDs, precice_dt)
 
     print('potentials:', pad_potentials)
-    
+    # pick the potentials that are not zero. due to parallelization, some pads may not have potentials
+    recieved_potentials = [pad_potentials[i] for i in range(commsize) if pad_potentials[i] != 0]
     # calculate the trace resistance
     # print('---------------------------------------------trace resistance calculation------------------------------------')
     print('pad_currents:', pad_currents)

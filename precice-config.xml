@@ -23,7 +23,7 @@
 
   <participant name="Elmer">
     <provide-mesh name="Elmer-Nodes-Mesh" />
-    <receive-mesh name="Spice-Nodes-Mesh" from="Spice" geometric-filter="no-filter" />
+    <receive-mesh name="Spice-Nodes-Mesh" from="Spice"/>
     <write-data name="Potential" mesh="Elmer-Nodes-Mesh" />
     <read-data name="Current Density" mesh="Elmer-Nodes-Mesh" />
     <read-data name="NewPotential" mesh="Elmer-Nodes-Mesh" />
